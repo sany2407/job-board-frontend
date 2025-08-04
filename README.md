@@ -1,36 +1,154 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Job Board Application
+
+A modern job board application built with Next.js, TypeScript, and Tailwind CSS that allows users to post jobs and apply for positions.
+
+## Features
+
+### For Job Posters
+
+- **Authentication**: Sign up or login with email and password
+- **Job Posting**: Create detailed job listings with:
+  - Job title, company, location
+  - Job type (Full-time, Part-time, Contract, Internship)
+  - Salary range
+  - Detailed description and requirements
+  - Contact email
+- **Dashboard**: View all posted jobs and manage applicants
+- **Applicant Management**: Review applications, contact candidates, and view resumes
+
+### For Job Seekers
+
+- **Job Search**: Browse available positions with search and filtering
+- **Job Applications**: Apply to jobs with resume upload and cover letter
+- **Job Details**: View comprehensive job information
+- **Save Jobs**: Bookmark interesting positions
+
+## Tech Stack
+
+- **Frontend**: Next.js 14 with TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: React Context API
+- **Data Storage**: localStorage (for demo purposes)
+- **Icons**: Lucide React
 
 ## Getting Started
 
-First, run the development server:
+1. **Install dependencies**:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+   ```bash
+   npm install
+   ```
+
+2. **Run the development server**:
+
+   ```bash
+   npm run dev
+   ```
+
+3. **Open your browser** and navigate to `http://localhost:3000`
+
+## Application Flow
+
+### Job Poster Flow
+
+1. Click "Post a Job" on the homepage
+2. Sign up or login with email/password
+3. Fill out the job posting form
+4. Submit the job listing
+5. Access dashboard to view posted jobs and applicants
+
+### Job Seeker Flow
+
+1. Browse jobs on the homepage or "Find Jobs" page
+2. Use search and filters to find relevant positions
+3. Click on a job to view details
+4. Apply with resume and cover letter
+5. Track saved jobs
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js app router pages
+│   ├── dashboard/         # Job poster dashboard
+│   ├── findJob/          # Job search and listing
+│   ├── login/            # Login page
+│   ├── postJob/          # Job posting form
+│   └── signup/           # Signup page
+├── components/           # Reusable components
+│   ├── Hero.tsx         # Homepage hero section
+│   ├── LoginForm.tsx    # Login form component
+│   ├── Navigation.tsx   # Main navigation
+│   ├── SignupForm.tsx   # Signup form component
+│   └── Whyus.tsx        # Why choose us section
+└── lib/                 # Utilities and context
+    ├── auth-context.tsx # Authentication context
+    ├── sample-data.ts   # Sample data initialization
+    └── utils.ts         # Utility functions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features in Detail
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Authentication
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Email/password authentication
+- Persistent login state using localStorage
+- Protected routes for job posting and dashboard
 
-## Learn More
+### Job Posting
 
-To learn more about Next.js, take a look at the following resources:
+- Comprehensive job form with validation
+- Real-time form updates
+- Success confirmation with navigation options
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Job Search
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Search by job title, company, or skills
+- Filter by location, job type, remote work, and featured status
+- Pagination for large result sets
+- Responsive design for all devices
 
-## Deploy on Vercel
+### Dashboard
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Overview statistics (total jobs, applicants, active jobs)
+- List of all posted jobs with applicant counts
+- Modal view for detailed applicant information
+- Contact and resume viewing capabilities
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Application System
+
+- File upload for resumes
+- Cover letter submission
+- Application tracking for job posters
+
+## Demo Data
+
+The application includes sample job data that is automatically loaded on first visit. This includes:
+
+- 5 sample job postings
+- Sample applicants with cover letters
+- Various job types and locations
+
+## Future Enhancements
+
+- Backend API integration
+- Database storage (PostgreSQL/MongoDB)
+- Email notifications
+- Advanced search filters
+- Job alerts and notifications
+- Company profiles
+- Resume parsing
+- Interview scheduling
+- Analytics dashboard
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+This project is open source and available under the MIT License.
