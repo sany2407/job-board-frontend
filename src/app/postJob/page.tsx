@@ -6,11 +6,13 @@ import axios from "axios";
 import LoginForm from "@/components/LoginForm";
 import SignupForm from "@/components/SignupForm";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const PostJobPage = () => {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [showLogin, setShowLogin] = useState(true);
-  const [showJobForm, setShowJobForm] = useState(false);
+  const [, setShowJobForm] = useState(false);
   const [jobData, setJobData] = useState({
     title: "",
     company: "",
@@ -48,7 +50,7 @@ const PostJobPage = () => {
     try {
       // Submit job to backend API
       const response = await axios.post(
-        "http://localhost:5000/api/jobs",
+        `${API_URL}/jobs`,
         jobData,
         {
           headers: {

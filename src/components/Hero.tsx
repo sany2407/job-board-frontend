@@ -15,7 +15,7 @@ const Button = ({
   size?: "sm" | "md" | "lg";
   variant?: "default" | "outline";
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => {
   const baseClasses =
     "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200";
@@ -49,7 +49,7 @@ const Input = ({
   ...props
 }: {
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => {
   return (
     <input
@@ -132,6 +132,14 @@ export default function Hero() {
                       setSearchTerm(e.target.value)
                     }
                     className="pl-10 h-12 bg-white/90 border-0 text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500"
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === "Enter") {
+                        const params = new URLSearchParams();
+                        if (searchTerm) params.append("q", searchTerm);
+                        if (locationFilter) params.append("location", locationFilter);
+                        router.push(`/findJob?${params.toString()}`);
+                      }
+                    }}
                   />
                 </div>
 
@@ -145,6 +153,14 @@ export default function Hero() {
                       setLocationFilter(e.target.value)
                     }
                     className="pl-10 h-12 bg-white/90 border-0 text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500"
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                      if (e.key === "Enter") {
+                        const params = new URLSearchParams();
+                        if (searchTerm) params.append("q", searchTerm);
+                        if (locationFilter) params.append("location", locationFilter);
+                        router.push(`/findJob?${params.toString()}`);
+                      }
+                    }}
                   />
                 </div>
               </div>

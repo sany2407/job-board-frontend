@@ -25,6 +25,7 @@ const LoginPage = () => {
         setError("Invalid email or password");
       }
     } catch (err) {
+      console.error(err);
       setError("An error occurred during login");
     } finally {
       setIsLoading(false);
@@ -96,7 +97,7 @@ const LoginPage = () => {
 
           <div className="mt-6 text-center">
             <p className="text-gray-600">
-              Don't have an account?{" "}
+              Don&apost have an account?{" "}
               <Link
                 href="/signup"
                 className="text-blue-600 hover:text-blue-700 font-medium"

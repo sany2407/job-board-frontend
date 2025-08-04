@@ -15,17 +15,15 @@ import {
   FileText,
   Calendar,
   Star,
-  Filter,
   Search,
   ArrowRight,
-  Edit,
-  Trash2,
   EyeOff,
   Check,
   XCircle,
   UserCheck,
-  UserX,
 } from "lucide-react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface Applicant {
   id: string;
@@ -102,7 +100,7 @@ const DashboardPage = () => {
       setError(null);
 
       const response = await axios.get(
-        "http://localhost:5000/api/jobs/user/my-jobs-with-applications",
+        `${API_URL}/jobs/user/my-jobs-with-applications`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -133,7 +131,7 @@ const DashboardPage = () => {
       setError(null);
 
       const response = await axios.get(
-        `http://localhost:5000/api/jobs/${jobId}/applications`,
+        `${API_URL}/jobs/${jobId}/applications`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -167,7 +165,7 @@ const DashboardPage = () => {
   ) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/jobs/${jobId}/applications/${applicationId}/status`,
+        `${API_URL}/jobs/${jobId}/applications/${applicationId}/status`,
         { status, notes },
         {
           headers: {
@@ -183,7 +181,7 @@ const DashboardPage = () => {
           app.id === applicationId
             ? {
                 ...app,
-                status: status as any,
+                status: status as "pending" | "reviewed" | "shortlisted" | "rejected" | "hired",
                 notes,
                 reviewedAt: new Date().toISOString(),
               }
@@ -206,39 +204,39 @@ const DashboardPage = () => {
     await fetchJobApplications(job.id);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "reviewed":
-        return "bg-blue-100 text-blue-800";
-      case "shortlisted":
-        return "bg-green-100 text-green-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      case "hired":
-        return "bg-purple-100 text-purple-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  // const getStatusColor = (status: string) => {
+  //   switch (status) {
+  //     case "pending":
+  //       return "bg-yellow-100 text-yellow-800";
+  //     case "reviewed":
+  //       return "bg-blue-100 text-blue-800";
+  //     case "shortlisted":
+  //       return "bg-green-100 text-green-800";
+  //     case "rejected":
+  //       return "bg-red-100 text-red-800";
+  //     case "hired":
+  //       return "bg-purple-100 text-purple-800";
+  //     default:
+  //       return "bg-gray-100 text-gray-800";
+  //   }
+  // };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="h-4 w-4" />;
-      case "reviewed":
-        return <Eye className="h-4 w-4" />;
-      case "shortlisted":
-        return <Star className="h-4 w-4" />;
-      case "rejected":
-        return <XCircle className="h-4 w-4" />;
-      case "hired":
-        return <UserCheck className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
-    }
-  };
+  // const getStatusIcon = (status: string) => {
+  //   switch (status) {
+  //     case "pending":
+  //       return <Clock className="h-4 w-4" />;
+  //     case "reviewed":
+  //       return <Eye className="h-4 w-4" />;
+  //     case "shortlisted":
+  //       return <Star className="h-4 w-4" />;
+  //     case "rejected":
+  //       return <XCircle className="h-4 w-4" />;
+  //     case "hired":
+  //       return <UserCheck className="h-4 w-4" />;
+  //     default:
+  //       return <Clock className="h-4 w-4" />;
+  //   }
+  // };
 
   const filteredApplications = applications.filter((app) => {
     const matchesStatus = statusFilter === "all" || app.status === statusFilter;
@@ -606,7 +604,7 @@ const ApplicationCard = ({
     applicationId: string,
     status: string,
     notes?: string
-  ) => Promise<any>;
+  ) => Promise<void>;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);

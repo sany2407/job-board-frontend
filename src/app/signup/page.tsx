@@ -39,6 +39,7 @@ const SignupPage = () => {
         setError("Failed to create account");
       }
     } catch (err) {
+      console.error(err);
       setError("An error occurred during signup");
     } finally {
       setIsLoading(false);

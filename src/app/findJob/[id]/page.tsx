@@ -18,9 +18,45 @@ import {
   Upload,
   FileText,
   CheckCircle,
-  Calendar,
   Award,
 } from "lucide-react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  salary: string;
+  description: string;
+  requirements: string;
+  contactEmail: string;
+  postedBy: string;
+  postedAt: string;
+  isActive: boolean;
+  totalApplications: number;
+  pendingApplications: number;
+  shortlistedApplications: number;
+  rejectedApplications: number;
+  hiredApplications: number;
+  posted: string;
+  logo: string;
+  featured?: boolean;
+  remote?: boolean;
+  skills?: string[];
+  experience?: string;
+  fullDescription?: string;
+  companyInfo?: {
+    description: string;
+    founded: string;
+    employees: string;
+    industry: string;
+    website: string;
+    benefits: string[];
+  };
+}
 
 // Application Modal Component
 const ApplicationModal = ({
@@ -28,7 +64,7 @@ const ApplicationModal = ({
   isOpen,
   onClose,
 }: {
-  job: any;
+  job: Job;
   isOpen: boolean;
   onClose: () => void;
 }) => {
@@ -41,6 +77,7 @@ const ApplicationModal = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -66,7 +103,7 @@ const ApplicationModal = ({
 
       // Submit application to backend API
       await axios.post(
-        `http://localhost:5000/api/jobs/${job.id}/apply`,
+        `${API_URL}/jobs/${job.id}/apply`,
         applicationData,
         {
           headers: {
@@ -75,7 +112,7 @@ const ApplicationModal = ({
         }
       );
 
-      // Reset form and close modal
+      // Reset form and show thank you modal
       setFormData({
         fullName: "",
         email: "",
@@ -83,7 +120,7 @@ const ApplicationModal = ({
         coverLetter: "",
         resume: null,
       });
-      onClose();
+      setIsThankYouModalOpen(true);
     } catch (error) {
       console.error("Error submitting application:", error);
       if (axios.isAxiosError(error)) {
@@ -268,6 +305,34 @@ const ApplicationModal = ({
         </div>
       </div>
 
+      {/* npm  You Modal */}
+      {isThankYouModalOpen && (
+        <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200 transform transition-all duration-300 ease-out">
+            <div className="p-6 text-center">
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Application Submitted!
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Your application for {job.title} at {job.company} has been
+                submitted. We will review your application and get back to you
+                shortly.
+              </p>
+              <button
+                onClick={() => {
+                  setIsThankYouModalOpen(false);
+                  onClose();
+                }}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         @keyframes slideIn {
           from {
@@ -298,7 +363,7 @@ const ApplicationModal = ({
 export default function JobDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const [job, setJob] = useState<any>(null);
+  const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -313,7 +378,7 @@ export default function JobDetailPage() {
 
         console.log("Fetching job details for ID:", jobId);
         const response = await axios.get(
-          `http://localhost:5000/api/jobs/${jobId}`
+          `${API_URL}/jobs/${jobId}`
         );
 
         console.log("Job API Response:", response.data);
@@ -544,7 +609,7 @@ export default function JobDetailPage() {
               </h2>
               <div
                 className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: job.fullDescription }}
+                dangerouslySetInnerHTML={{ __html: job.fullDescription || "" }}
               />
             </div>
 
@@ -554,7 +619,7 @@ export default function JobDetailPage() {
                 About {job.company}
               </h2>
               <p className="text-gray-700 mb-6">
-                {job.companyInfo.description}
+                {job.companyInfo?.description}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -565,23 +630,23 @@ export default function JobDetailPage() {
                   <div className="space-y-2">
                     <div className="flex items-center text-gray-600">
                       <Building className="h-4 w-4 mr-2" />
-                      <span>Founded: {job.companyInfo.founded}</span>
+                      <span>Founded: {job.companyInfo?.founded}</span>
                     </div>
                     <div className="flex items-center text-gray-600">
                       <Users className="h-4 w-4 mr-2" />
-                      <span>{job.companyInfo.employees} employees</span>
+                      <span>{job.companyInfo?.employees} employees</span>
                     </div>
                     <div className="flex items-center text-gray-600">
                       <Award className="h-4 w-4 mr-2" />
-                      <span>{job.companyInfo.industry}</span>
+                      <span>{job.companyInfo?.industry}</span>
                     </div>
                     <div className="flex items-center text-gray-600">
                       <Globe className="h-4 w-4 mr-2" />
                       <a
-                        href={job.companyInfo.website}
+                        href={job.companyInfo?.website}
                         className="text-blue-600 hover:underline"
                       >
-                        {job.companyInfo.website}
+                        {job.companyInfo?.website}
                       </a>
                     </div>
                   </div>
@@ -592,7 +657,7 @@ export default function JobDetailPage() {
                     Benefits
                   </h3>
                   <ul className="space-y-2">
-                    {job.companyInfo.benefits.map(
+                    {job.companyInfo?.benefits?.map(
                       (benefit: string, index: number) => (
                         <li
                           key={index}

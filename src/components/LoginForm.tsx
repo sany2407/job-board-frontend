@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "next/navigation";
 
 interface LoginFormProps {
   onSwitchToSignup: () => void;
@@ -17,7 +16,7 @@ export default function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { login } = useAuth();
-  const router = useRouter();
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +102,7 @@ export default function LoginForm({
 
         <div className="mt-6 text-center">
           <p className="text-gray-600">
-            Don't have an account?{" "}
+            Don&apost have an account?{" "}
             <button
               onClick={onSwitchToSignup}
               className="text-blue-600 hover:text-blue-700 font-medium"

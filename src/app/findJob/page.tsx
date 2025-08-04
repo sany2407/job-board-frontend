@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import {
   Search,
@@ -9,7 +9,6 @@ import {
   Filter,
   Star,
   Clock,
-  Building,
   DollarSign,
   Bookmark,
   Share2,
@@ -18,20 +17,35 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  CheckCircle,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth-context"; 
 
-// Helper function to get time ago
-const getTimeAgo = (date: Date) => {
-  const now = new Date();
-  const diffInMs = now.getTime() - date.getTime();
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-  if (diffInDays === 0) return "Today";
-  if (diffInDays === 1) return "1 day ago";
-  if (diffInDays < 7) return `${diffInDays} days ago`;
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-  return `${Math.floor(diffInDays / 30)} months ago`;
-};
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  salary: string;
+  description: string;
+  requirements: string;
+  contactEmail: string;
+  postedBy: string;
+  postedAt: string;
+  isActive: boolean;
+  totalApplications: number;
+  pendingApplications: number;
+  shortlistedApplications: number;
+  rejectedApplications: number;
+  hiredApplications: number;
+  posted: string;
+  logo: string;
+  featured?: boolean;
+  remote?: boolean;
+  skills?: string[];
+  experience?: string;
+}
 
 // Application Modal Component
 const ApplicationModal = ({
@@ -39,7 +53,7 @@ const ApplicationModal = ({
   isOpen,
   onClose,
 }: {
-  job: any;
+  job: Job;
   isOpen: boolean;
   onClose: () => void;
 }) => {
@@ -52,6 +66,7 @@ const ApplicationModal = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,7 +109,7 @@ const ApplicationModal = ({
         coverLetter: "",
         resume: null,
       });
-      onClose();
+      setIsThankYouModalOpen(true);
     } catch (error) {
       console.error("Error submitting application:", error);
       if (axios.isAxiosError(error)) {
@@ -279,6 +294,34 @@ const ApplicationModal = ({
         </div>
       </div>
 
+      {/* Thank You Modal */}
+      {isThankYouModalOpen && (
+        <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200 transform transition-all duration-300 ease-out">
+            <div className="p-6 text-center">
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Application Submitted!
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Your application for {job.title} at {job.company} has been
+                submitted. We will review your application and get back to you
+                shortly.
+              </p>
+              <button
+                onClick={() => {
+                  setIsThankYouModalOpen(false);
+                  onClose();
+                }}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         @keyframes slideIn {
           from {
@@ -306,10 +349,14 @@ const ApplicationModal = ({
   );
 };
 
-export default function FindJobPage() {
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+function FindJobPageContent() {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [location, setLocation] = useState("");
+  const searchParams = useSearchParams();
+  const { user,  } = useAuth(); // Add this line
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+  const [location, setLocation] = useState(searchParams.get("location") || "");
   const [selectedFilters, setSelectedFilters] = useState({
     jobType: [],
     experience: [],
@@ -318,11 +365,11 @@ export default function FindJobPage() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
-  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 8;
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -334,7 +381,7 @@ export default function FindJobPage() {
         setError(null);
         console.log("Fetching jobs from API...");
 
-        const response = await axios.get("http://localhost:5000/api/jobs");
+        const response = await axios.get(`${API_URL}/jobs`);
         console.log("API Response:", response);
         console.log("Response data:", response.data);
 
@@ -382,7 +429,7 @@ export default function FindJobPage() {
     );
   };
 
-  const handleApplyClick = (job: any) => {
+  const handleApplyClick = (job: Job) => {
     setSelectedJob(job);
     setIsModalOpen(true);
   };
@@ -396,11 +443,11 @@ export default function FindJobPage() {
     router.push(`/findJob/${jobId}`);
   };
 
-  const filteredJobs = jobs.filter((job: any) => {
+  const filteredJobs = jobs.filter((job: Job) => {
     const matchesSearch =
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.skills.some((skill: string) =>
+      job.skills?.some((skill: string) =>
         skill.toLowerCase().includes(searchTerm.toLowerCase())
       );
     const matchesLocation =
@@ -444,6 +491,15 @@ export default function FindJobPage() {
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocation(e.target.value);
     setCurrentPage(1);
+  };
+
+  // Handler for Post a Job button
+  const handlePostJobClick = () => {
+    if (user) {
+      router.push("/postJob");
+    } else {
+      router.push("/login?redirect=/postJob");
+    }
   };
 
   return (
@@ -663,7 +719,7 @@ export default function FindJobPage() {
                           console.log("Retrying to fetch jobs from API...");
 
                           const response = await axios.get(
-                            "http://localhost:5000/api/jobs"
+                            `${API_URL}/jobs`
                           );
                           console.log("Retry API Response:", response);
                           console.log("Retry Response data:", response.data);
@@ -765,7 +821,7 @@ export default function FindJobPage() {
                             {job.description}
                           </p>
                           <div className="flex flex-wrap gap-2 mb-4">
-                            {job.skills.map((skill: string) => (
+                            {job.skills?.map((skill: string) => (
                               <span
                                 key={skill}
                                 className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
@@ -885,7 +941,10 @@ export default function FindJobPage() {
               </h3>
 
               <div className="space-y-4">
-                <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                <button
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                  onClick={handlePostJobClick}
+                >
                   Post a Job
                 </button>
 
@@ -951,5 +1010,20 @@ export default function FindJobPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function FindJobPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <FindJobPageContent />
+    </Suspense>
   );
 }
